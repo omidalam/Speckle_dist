@@ -166,10 +166,7 @@ if rt_exist==None or not isinstance(rt_exist, TextWindow):
     table= ResultsTable()
 else:
     table = rt_exist.getTextPanel().getOrCreateResultsTable()
-#find the shortest line
-#x1,y1, x2,y2 = get_closest_points( speckle_roi, spot_roi )
-#line = Line(x1,y1, x2,y2 )
-#dist = math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2)) * imp.getCalibration().pixelWidth
+
 
 dist2,xe,ye,xc,yc= get_center_edge_dist(speckle_roi, spot_roi)
 line2 = Line(xe,ye, xc,yc)
@@ -181,20 +178,13 @@ table.addValue("Distance(micron)", dist2)
 ov=imp.getOverlay()
 if ov==None:
 	ov=Overlay()
-#ov=O verlay()
-#line.setStrokeWidth(0.2)
-#ov.add(line)
+
 line2.setStrokeWidth(0.2)
 line2.setStrokeColor(Color.PINK)
 ov.add(line2)
 
 
-#rm = RoiManager.getInstance()
-#rm.runCommand('reset')
 
-#rm.addRoi(speckle_roi)
-#rm.addRoi(spot_roi)
-#rm.addRoi(rm.addRoi(spot_roi))
 ov.add(PointRoi(xc,yc))
 ov.add(speckle_roi)
 
