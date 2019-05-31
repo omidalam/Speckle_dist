@@ -114,7 +114,8 @@ def get_closest_points( roi1, roi2 ):
 				dist_min=dist
 				min1 = i1
 				min2 = i2
-	return [x1[min1],y1[min1], x2[min2],y2[min2]]
+	cal_dist=math.sqrt(dist_min)*imp.getCalibration().pixelWidth
+	return [cal_dist,x1[min1],y1[min1], x2[min2],y2[min2]]
 
 def get_center_edge_dist(speckle, spot):
 	# get a polygon of the Roi
