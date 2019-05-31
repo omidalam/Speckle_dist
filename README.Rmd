@@ -18,7 +18,8 @@ We are often interested in finding the relative distance of a genomic loci with 
     - The closest nuclear is guess by the user, user can repeat the process if there close ties.
     
 ## User input
-ImageJ user defines following parameters
+ImageJ user defines following parameters.
+
 1. Channel number containing nuclear comartment signal a number between 1-4.
 1. Channel number containing genomic loci signal a number between 1-4.
 1. Threshold value for compartment boundary detection based on percent of maximum signal: a number between 0.0-1.0 .
@@ -29,8 +30,8 @@ ImageJ user defines following parameters
 
 # Algorithm
 ## Compartment bounary detection
-I'm defining the border of the nuclear speckles as some percentage of the max compartment signal (let's say 50% of maximum signal). This boundary would be different for signals with different noise level. For example figure below shows the line profile a spot with and without noise. The threshold line for generating the binary image is defined as max/2. Note that the binary image of the noisy is going to be bigger.
-```{r echo=FALSE,warning=FALSE}
+I'm defining the border of the nuclear speckles as some percentage of the maximum signal intensity (let's say 50% of maximum signal). This boundary would be different for signals with different noise level. For example figure below shows the line profile a spot with and without noise. The threshold line for generating the binary image is defined as max/2. Note that the binary image of the noisy is going to be bigger.
+```{r echo=FALSE,warning=FALSE, fig.cap="Boundary detection based on 50% of maximum signal."}
 x<- seq(-4, 4, length=100)
 hx <- dnorm(x)*1000
 signal= data.frame(signal=hx,index=seq(1,100), noise="Original")
