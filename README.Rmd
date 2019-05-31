@@ -2,9 +2,12 @@
 title: "Genomic loci to compartment distance ImageJ plugin"
 author: "Omid Gholamalamdari"
 date: "5/24/2019"
-output: pdf_document
+output: rmarkdown::github_document
 ---
-
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+```
 # Goal
 We are often interested in finding the relative distance of a genomic loci with respect to a nuclear compartment (e.g Nuclear Speckles, Nucleoulus) in our microscopic experiments. The goal of this document is describe the algorithm used in an ImageJ plugin. This algorithm is developed based on conversations between Dr. Andrew Belmont lab members.
 
@@ -27,7 +30,7 @@ ImageJ user defines following parameters
 # Algorithm
 ## Compartment bounary detection
 I'm defining the border of the nuclear speckles as some percentage of the max compartment signal (let's say 50% of maximum signal). This boundary would be different for signals with different noise level. For example figure below shows the line profile a spot with and without noise. The threshold line for generating the binary image is defined as max/2. Note that the binary image of the noisy is going to be bigger.
-```{r}
+```{r echo=FALSE,warning=FALSE}
 x<- seq(-4, 4, length=100)
 hx <- dnorm(x)*1000
 signal= data.frame(signal=hx,index=seq(1,100), noise="Original")
@@ -42,11 +45,13 @@ image$binary="Image"
 b_image<-rbind(signal_T,noisy_T)
 b_image$binary="Binary"
 data<-rbind(b_image,image)
-b_image
-library(ggplot2)
+# b_image
+
 ggplot(data = data,aes(x=index, y=signal)) + geom_line()+facet_wrap(noise~binary,scales = "free")# + geom_hline(data= thresh,aes(yintercept=hline), linetype="dashed", color = "red")
 ```
+
 ### Noise subtraction 
+
 Removing the background noise is crucial for boundary measurements. 
 - Sources of noise
 
