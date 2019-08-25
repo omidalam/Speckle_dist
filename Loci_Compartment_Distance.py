@@ -1,11 +1,11 @@
 #@ File(label='Choose a directory containg D3D.dv files:', style='directory') src_dir
-#@ Short(label='Compartment Channel', value=1, min=0, max=3, stepSize=1, style="slider") comp_ch
-#@ Short(label='Loci Channel', value=2, min=0, max=3, stepSize=1, style="slider") loci_ch
+#@ Short(label='Compartment Channel', value=2, min=1, max=4, stepSize=1, style="slider") comp_ch
+#@ Short(label='Loci Channel', value=3, min=1, max=4, stepSize=1, style="slider") loci_ch
 #@ Integer(label='Number of slices around loci to consider',value=7, min=1, max=15) z_range
 #@ Float(label='Comartment Thresholding', value=0.4, min=0.1, max=1.0, stepSize=0.1, style="slider") comp_T
 #@ String(label="Measure compartment's boundary to:",choices={"locus center", "locus boundary"}, style="radioButtonHorizontal") loci_method
 #@ Float(label='Locus Thresholding (only for "locus boundary" mode)', value=0.5, min=0.1, max=1.0, stepSize=0.1, style="slider") loci_T
-
+#@ Boolean(label="Measure loci's feret and area?") measure_feret
 """
 Copyright (c) 2019; Omid Gholamalamdari, Belmont Lab, UIUC
 All rights reserved.
@@ -32,7 +32,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."""
 
-pars={"comp_ch":comp_ch,"loci_ch":loci_ch,"z_range":z_range,"comp_T":comp_T,"loci_T":loci_T,"loci_method":loci_method}
+pars={"comp_ch":comp_ch-1,"loci_ch":loci_ch-1,"z_range":z_range,"comp_T":comp_T,"loci_T":loci_T,"loci_method":loci_method,"measure_feret":measure_feret}
 from ij import IJ
 from ij import IJ, WindowManager
 from java.awt.event import KeyEvent, KeyAdapter
@@ -140,7 +140,33 @@ def thresh(sum_prj,thresh,roi,method):
 		stats = impt.getStatistics( mm.CENTROID)
 	 	xl, yl = stats.xCentroid+bounds.x,stats.yCentroid+bounds.y
 		return {"x":xl,"y":yl}
-		
+def feret(sum_prj,thresh,roi,pixel_size):
+	from ij import ImagePlus
+	from ij.measure import Measurements as mm
+	from ij.process import ImageProcessor
+	from ij.plugin.filter import ThresholdToSelection
+	from ij.gui import Roi,PointRoi
+	def max_pix(sum_prj,roi):
+	#	Get sum_prj image and an roi as input and output max signal in roi
+		imp=sum_prj.duplicate() #copy the array as float
+		imp.setRoi(roi)
+		stats = imp.getStatistics()
+		return stats.max
+	
+	imp=sum_prj.duplicate()
+	max_pix=max_pix(imp,roi)
+	
+	ip=imp.getProcessor()
+	ip.setValue(0)
+	ip.fillOutside(roi)
+
+	ip.setThreshold(max_pix*thresh,max_pix,ImageProcessor.NO_LUT_UPDATE)
+	bndry_roi= ThresholdToSelection.run(imp)
+	imp.setRoi(bndry_roi)
+	stats = imp.getStatistics()
+	loci_area=stats.area*(pixel_size**2)
+	loci_feret=bndry_roi.getFeretsDiameter()*pixel_size
+	return bndry_roi, loci_feret, loci_area	
 def get_center_edge_dist(imp,speckle, spot):
 ####	Gets a compartment roi and a point roi. estimate the compartment with a polygon. 
 #		And measures the shortest line from the point to the boundary
@@ -233,27 +259,13 @@ def main(imp,options):
 			thresh=options["loci_T"],
 			roi=roi_int,
 			method="boundary")
+		
 	
 	if options["loci_method"]== "locus center":
 		dist,xc,yc,xl,yl=get_center_edge_dist(imp,comp_roi, loci_roi)
 	elif options["loci_method"]== "locus boundary":
 		dist,xc,yc,xl,yl=get_closest_points(imp,comp_roi,loci_roi)
-	ov=imp.getOverlay()
-	if ov==None:
-		ov=Overlay()
-	line = Line(xc,yc, xl,yl)
-	line.setStrokeWidth(0.2)
-	line.setStrokeColor(Color.PINK)
-	ov.add(line)
 
-	## Adding loci overlay
-	if options["loci_method"]== "locus center":
-		ov.add(PointRoi(loci_roi["x"],loci_roi["y"]))
-	elif options["loci_method"]== "locus boundary":
-		ov.add(loci_roi)
-	
-	ov.add(comp_roi)
-	imp.setOverlay(ov)
 
 	rt_exist = WindowManager.getWindow("Loci distance to compartment")
 	
@@ -264,7 +276,34 @@ def main(imp,options):
 	table.incrementCounter()
 	table.addValue("Label", imp.title)
 	table.addValue("Distance(micron)", dist)
+	
+	if options['measure_feret']:
+		feret_roi,loci_feret,loci_area= feret(sum_prj=loci_imp,thresh=options["loci_T"],
+		roi=roi_int,pixel_size=imp.getCalibration().pixelWidth)
+		table.addValue("Loci feret", loci_feret)
+		table.addValue("Loci area", loci_area)
+		
+		
 	table.show("Loci distance to compartment")
+
+	## Adding loci overlay
+	ov=imp.getOverlay()
+	if ov==None:
+		ov=Overlay()
+	line = Line(xc,yc, xl,yl)
+	line.setStrokeWidth(0.2)
+	line.setStrokeColor(Color.PINK)
+	ov.add(line)
+
+	
+	if options["loci_method"]== "locus center":
+		ov.add(PointRoi(loci_roi["x"],loci_roi["y"]))
+	elif options["loci_method"]== "locus boundary":
+		ov.add(loci_roi)
+	if options['measure_feret']:
+		ov.add(feret_roi)
+	ov.add(comp_roi)
+	imp.setOverlay(ov)	
 
 
 def measure_key(imp, keyEvent):
