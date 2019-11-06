@@ -141,6 +141,13 @@ def thresh(sum_prj,thresh,roi,method):
 	 	xl, yl = stats.xCentroid+bounds.x,stats.yCentroid+bounds.y
 		return {"x":xl,"y":yl}
 def feret(sum_prj,thresh,roi,pixel_size):
+	'''
+	CAlculates feret diameter (longest line that can be fitted) of a feature.
+	sum_prj: sum projected image.
+	thresh: threshold for making the binary image.
+	roi: ROI to perform the action on.
+	pixel_size: pixel x_y pixel size to calculate microns from pixels.
+	'''
 	from ij import ImagePlus
 	from ij.measure import Measurements as mm
 	from ij.process import ImageProcessor
@@ -190,15 +197,14 @@ def get_center_edge_dist(imp,speckle, spot):
 	min2 = -1
 	dist_min = 1e10
 	for i1 in range(len(x1)):
-		dist =  (x1[i1]-xc)*(x1[i1]-xc) \
-		       +(y1[i1]-yc)*(y1[i1]-yc)
+		dist =  (x1[i1]-xc)*(x1[i1]-xc) +(y1[i1]-yc)*(y1[i1]-yc)
 		if(dist<dist_min ):
 			dist_min=dist
 			min1 = i1
 	cal_dist=math.sqrt(dist_min)*imp.getCalibration().pixelWidth #distance in micron
 	return [cal_dist,x1[min1],y1[min1],xc,yc]	
 def get_closest_points(imp,roi1, roi2 ):
-	# get a polygon of the Roi
+	# Finds the distance of two rois by approximating them as polygons.
 	import math
 	fp1  = roi1.getInterpolatedPolygon(1.,False)
 	x1 = fp1.xpoints
@@ -212,8 +218,7 @@ def get_closest_points(imp,roi1, roi2 ):
 	dist_min = 1e10
 	for i1 in range(len(x1)):
 		for i2 in range(len(x2)):
-			dist =  (x1[i1]-x2[i2])*(x1[i1]-x2[i2]) \
-			       +(y1[i1]-y2[i2])*(y1[i1]-y2[i2])
+			dist =  (x1[i1]-x2[i2])*(x1[i1]-x2[i2]) +(y1[i1]-y2[i2])*(y1[i1]-y2[i2])
 			if(dist<dist_min ):
 				dist_min=dist
 				min1 = i1
@@ -365,7 +370,7 @@ def measure_gd(src_folder,file_names):
 
 ##MAIN
 counter=0
-images_path=get_files(src_dir,ext="*D3D.dv")
+images_path=get_files(src_dir,ext="*D3D.dv") # regex pattern to look in the folder.
 if len(images_path)==0:
 	IJ.log("There are no images in the specified folder")
 else:
