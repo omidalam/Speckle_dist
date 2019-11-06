@@ -1,4 +1,5 @@
 #@ File(label='Choose a directory containg D3D.dv files:', style='directory') src_dir
+#@ String (label="File extension to look in the folder (e.g. D3D.dv or D3D_ALX.dv)") file_extension
 #@ Short(label='Compartment Channel', value=2, min=1, max=4, stepSize=1, style="slider") comp_ch
 #@ Short(label='Loci Channel', value=3, min=1, max=4, stepSize=1, style="slider") loci_ch
 #@ Integer(label='Number of slices around loci to consider',value=7, min=1, max=15) z_range
@@ -370,7 +371,7 @@ def measure_gd(src_folder,file_names):
 
 ##MAIN
 counter=0
-images_path=get_files(src_dir,ext="*D3D.dv") # regex pattern to look in the folder.
+images_path=get_files(src_dir,ext="*"+file_extension) # regex pattern to look in the folder.
 if len(images_path)==0:
 	IJ.log("There are no images in the specified folder")
 else:
