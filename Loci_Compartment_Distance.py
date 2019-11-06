@@ -1,5 +1,5 @@
 #@ File(label='Choose a directory containg D3D.dv files:', style='directory') src_dir
-#@ String (label="File extension to look in the folder (e.g. D3D.dv or D3D_ALX.dv)") file_extension
+#@ String (label="File extension to look in the folder (e.g. D3D.dv or D3D_ALX.dv)",value="D3D.dv") file_extension
 #@ Short(label='Compartment Channel', value=2, min=1, max=4, stepSize=1, style="slider") comp_ch
 #@ Short(label='Loci Channel', value=3, min=1, max=4, stepSize=1, style="slider") loci_ch
 #@ Integer(label='Number of slices around loci to consider',value=7, min=1, max=15) z_range
