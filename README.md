@@ -22,8 +22,8 @@ members. Please acknowledge/cite (Our future paper).
 # Installation
 
   - Make sure you have an up-to-date version of FIJI/ImageJ.
-  - For Windows: copy the “Loci\_Compartment\_Distance.py” in “C:Files”
-  - For mac: right-click on FIJI in your application folder -\> Show
+  - For Windows: copy the “Loci\_Compartment\_Distance.py” to "path_to_imageJ\plugins\".
+  - For mac: right-click on FIJI in your applications folder -\> Show
     package contents -\> copy the “Loci\_Compartment\_Distance.py” in
     the plugins folder.
   - Once FIJI restarted, you can find it under the plugins menu.
